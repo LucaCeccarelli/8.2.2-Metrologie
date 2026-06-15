@@ -154,9 +154,9 @@ for i in {1..10}; do curl -s -X POST "http://localhost:8080/process?items=30&del
 
 Puis verifier l'alerte `HighBusinessLoad`.
 
-## 11) Hypotheses et limites
+## 8) Hypotheses et limites
 
 - Deploiement cible: cluster local `kind` mono-noeud.
 - Alertmanager utilise un receveur minimal (pas d'integration e-mail/Slack) pour rester autonome et reproductible.
 - Persistance longue duree (volumes dedies) non configuree pour Prometheus/Grafana.
-- Le dashboard est fourni en export JSON dans `grafana/dashboard.json` et egalement provisionne via ConfigMap.
+
