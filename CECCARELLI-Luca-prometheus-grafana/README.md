@@ -1,34 +1,11 @@
-# TP Prometheus et Grafana
+# TP Prometheus et Grafana - Luca CECCARELLI
 
-Ce rendu fournit une stack d'observabilite complete sur Kubernetes `kind`, sans Helm ni Prometheus Operator.
-
-## 1) Prerequis
-
-- Docker
-- kind
-- kubectl
-- curl
-
-## 2) Arborescence
-
-```text
-CECCARELLI-Luca-prometheus-grafana/
-  README.md
-  app/
-  manifests/
-  grafana/
-    dashboard.json
-```
-
-## 3) Procedure de deploiement
-
-Depuis `CECCARELLI-Luca-prometheus-grafana/`:
-
+## 1) Procedure de deploiement
 ```bash
 # Creation du cluster local kind
 kind create cluster --config kind-cluster.yaml
 
-# Build de l'image applicative (tag fige)
+# Build de l'image applicative
 docker build -t tpmetrics-app:v1.0.0 ./app
 
 # Injection de l'image dans kind
@@ -38,9 +15,6 @@ kind load docker-image tpmetrics-app:v1.0.0 --name tp-observability
 kubectl apply -f manifests/
 ```
 
-Note: `kind-cluster.yaml` est volontairement hors de `manifests/` pour eviter de l'envoyer a `kubectl apply`.
-Note: si le cluster existe deja, recreer le cluster pour prendre en compte les `extraPortMappings` du fichier kind.
-
 Verifier les pods:
 
 ```bash
@@ -48,19 +22,7 @@ kubectl get pods -A
 kubectl get svc -A
 ```
 
-## 4) Procedure de construction / image applicative
-
-Image utilisee par l'application HTTP instrumentee:
-
-- `tpmetrics-app:v1.0.0` (construite localement via `app/Dockerfile`)
-
-Commande:
-
-```bash
-docker build -t tpmetrics-app:v1.0.0 ./app
-```
-
-## 5) Procedure d'acces aux interfaces
+## 2) Procedure d'acces aux interfaces
 
 Les acces externes sont exposes via `NodePort` + `kind extraPortMappings`.
 
@@ -89,9 +51,7 @@ Ouvrir `http://localhost:3000` avec:
 - login: `admin`
 - mot de passe: `admin`
 
-Le dashboard est provisionne automatiquement depuis un ConfigMap.
-
-## 6) Methode de generation de trafic
+## 3) Methode de generation de trafic
 
 Script reproductible fourni:
 
@@ -112,7 +72,7 @@ Ce script genere:
 - trafic `5xx`
 - appels metier sur `/process` pour alimenter la metrique applicative
 
-## 7) Choix d'instrumentation de l'application
+## 4) Choix d'instrumentation de l'application
 
 L'application FastAPI expose:
 
@@ -127,7 +87,7 @@ L'application FastAPI expose:
 
 Instrumentation effectuee via middleware FastAPI et endpoint `/metrics`.
 
-## 8) Requetes PromQL principales
+## 5) Requetes PromQL principales
 
 Dashboard:
 
@@ -153,12 +113,12 @@ Alertes:
 - Alerte 4 (alerte metier applicative):
   - `sum(increase(app_processed_items_total[5m])) > 200`
 
-## 9) Seuil X choisi pour l'alerte 5xx
+## 6) Seuil X choisi pour l'alerte 5xx
 
 - Seuil retenu: `X = 20` erreurs `5xx` sur 5 minutes.
 - Justification: en contexte de microservice simple, depasser 20 erreurs `5xx` sur 5 minutes indique une degradation significative, tout en evitant un bruit excessif lors d'incidents ponctuels tres courts.
 
-## 10) Methode de test des alertes
+## 7) Methode de test des alertes
 
 ### Test alerte 5xx
 
@@ -198,5 +158,5 @@ Puis verifier l'alerte `HighBusinessLoad`.
 
 - Deploiement cible: cluster local `kind` mono-noeud.
 - Alertmanager utilise un receveur minimal (pas d'integration e-mail/Slack) pour rester autonome et reproductible.
-- Persistance longue duree (volumes dedies) non configuree pour Prometheus/Grafana dans cette version de TP.
+- Persistance longue duree (volumes dedies) non configuree pour Prometheus/Grafana.
 - Le dashboard est fourni en export JSON dans `grafana/dashboard.json` et egalement provisionne via ConfigMap.
