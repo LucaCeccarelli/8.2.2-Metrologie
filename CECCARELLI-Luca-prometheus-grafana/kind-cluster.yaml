@@ -3,6 +3,10 @@ apiVersion: kind.x-k8s.io/v1alpha4
 name: tp-observability
 nodes:
   - role: control-plane
+    extraMounts:
+      - hostPath: grafana
+        containerPath: /grafana
+        readOnly: true
     extraPortMappings:
       - containerPort: 30080
         hostPort: 8080
