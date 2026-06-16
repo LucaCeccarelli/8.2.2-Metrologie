@@ -1,33 +1,22 @@
 ---
 # Job: import Air Quality CSV into Elasticsearch via Logstash
 # The dataset is mounted from the kind node (hostPath extraMount in kind-cluster.yaml)
+#
+# Kubernetes va relancer le Job automatiquement en cas d'échec (backoff exponentiel).
+# backoffLimit élevé pour laisser le temps à Elasticsearch de démarrer (~90s).
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: air-quality-importer
   namespace: elk
 spec:
-  # Allow manual re-run by deleting and re-creating the job
-  backoffLimit: 3
+  backoffLimit: 8
   template:
     metadata:
       labels:
         app: air-quality-importer
     spec:
       restartPolicy: OnFailure
-      initContainers:
-        # Wait for Elasticsearch to be ready before starting the import
-        - name: wait-for-es
-          image: busybox:1.36
-          command:
-            - sh
-            - -c
-            - |
-              until wget -qO- http://elasticsearch:9200/_cluster/health?wait_for_status=yellow&timeout=5s > /dev/null 2>&1; do
-                echo "Waiting for Elasticsearch...";
-                sleep 5;
-              done;
-              echo "Elasticsearch is ready."
       containers:
         - name: air-quality-importer
           # Tag figé — à rebuilder si l'on modifie air-quality-importer/

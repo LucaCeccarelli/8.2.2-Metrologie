@@ -27,46 +27,19 @@ kind load docker-image http-app:1.0.0 --name tp-elk
 kind load docker-image air-quality-importer:1.0.0 --name tp-elk
 ```
 
-### 4) Déployer les manifests
+### 4) Déployer tous les manifests
 
 ```bash
-kubectl apply -f manifests/00-namespaces.yaml
-kubectl apply -f manifests/01-elasticsearch.yaml
-kubectl apply -f manifests/02-kibana.yaml
-kubectl apply -f manifests/03-logstash.yaml
-kubectl apply -f manifests/04-filebeat.yaml
-kubectl apply -f manifests/05-app.yaml
+kubectl apply -f manifests/
 ```
 
-### 5) Attendre que les composants soient prêts
+### 5) Surveiller la convergence
 
 ```bash
-# Elasticsearch
-kubectl rollout status statefulset/elasticsearch -n elk --timeout=180s
-
-# Kibana
-kubectl rollout status deployment/kibana -n elk --timeout=180s
-
-# Logstash
-kubectl rollout status deployment/logstash -n elk --timeout=180s
-
-# Filebeat
-kubectl rollout status daemonset/filebeat -n elk --timeout=120s
-
-# Application
-kubectl rollout status deployment/http-app -n elk --timeout=60s
+# Suivre l'état de tous les pods en temps réel
+kubectl get pods -n elk -w
 ```
-
-### 6) Lancer l'import Air Quality
-
-```bash
-kubectl apply -f manifests/06-air-quality-importer.yaml
-
-# Suivre l'avancement
-kubectl logs -f job/air-quality-importer -n elk
-```
-
-### 7) Vérifier l'état du cluster
+### 6) Vérifier l'état final
 
 ```bash
 kubectl get all -n elk
