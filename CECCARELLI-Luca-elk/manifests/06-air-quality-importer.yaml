@@ -1,0 +1,55 @@
+---
+# Job: import Air Quality CSV into Elasticsearch via Logstash
+# The dataset is mounted from the kind node (hostPath extraMount in kind-cluster.yaml)
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: air-quality-importer
+  namespace: elk
+spec:
+  # Allow manual re-run by deleting and re-creating the job
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: air-quality-importer
+    spec:
+      restartPolicy: OnFailure
+      initContainers:
+        # Wait for Elasticsearch to be ready before starting the import
+        - name: wait-for-es
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              until wget -qO- http://elasticsearch:9200/_cluster/health?wait_for_status=yellow&timeout=5s > /dev/null 2>&1; do
+                echo "Waiting for Elasticsearch...";
+                sleep 5;
+              done;
+              echo "Elasticsearch is ready."
+      containers:
+        - name: air-quality-importer
+          # Tag figé — à rebuilder si l'on modifie air-quality-importer/
+          # Commande: docker build -t air-quality-importer:1.0.0 air-quality-importer/ && kind load docker-image air-quality-importer:1.0.0 --name tp-elk
+          image: air-quality-importer:1.0.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: XPACK_MONITORING_ENABLED
+              value: "false"
+          volumeMounts:
+            - name: datasets
+              mountPath: /datasets
+              readOnly: true
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "300m"
+            limits:
+              memory: "768Mi"
+              cpu: "600m"
+      volumes:
+        - name: datasets
+          hostPath:
+            path: /datasets
+            type: Directory
