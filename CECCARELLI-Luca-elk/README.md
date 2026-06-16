@@ -6,7 +6,6 @@
 
 ```bash
 # Depuis la racine du projet
-
 # Image de l'application HTTP
 docker build -t http-app:1.0.0 app/
 
@@ -159,6 +158,30 @@ Champs métier (selon la route) :
 | Par lieu | `geo_place_name : "Bronx"` |
 | Pics de pollution 2008–2014 | Plage de temps + tri `data_value` desc |
 
+#### Recherche combinée polluant + data_value + fenêtre temporelle
+
+![Recherche polluant entre 2 dates > 10](screenshots/recherche_avec_polluant_entre_2_dates_sup_10.png)
+
+#### Champs utiles dans Discover, triés par `data_value` décroissant
+
+![Champs utiles triés desc](screenshots/champs_utiles_desc.png)
+
+#### Visualisation time-series : `Average(data_value)` par polluant
+
+![Évolution data_value par polluant](screenshots/evolution_data_value_par_polluant.png)
+
+#### Heatmap comparaison période × polluant
+
+![Heatmap comparaison période et polluant](screenshots/heatmap_comparaison_periode_et_polluant.png)
+
+#### Contrôle Options list sur `geo_place_name`
+
+![Contrôle options geo_place_name](screenshots/control_option_geo_place_name.png)
+
+#### Filtre actif sur Bronx
+
+![Filtre sur Bronx](screenshots/filtre_sur_bronx.png)
+
 ---
 
 ## Description des dashboards
@@ -169,9 +192,9 @@ Destiné à un développeur qui investigue un incident. Visualisations :
 - **Timeline des erreurs** : ligne temporelle des requêtes 4xx et 5xx
 - **Top routes en erreur** : bar chart `http_path` × `http_status_family`
 - **Distribution des statuts** : pie chart des familles de statuts
-- **Requêtes lentes** : percentile `duration_ms` par route
 - **Top messages d'erreur** : table `app_message` groupé par occurrence
-- **Flux de logs récents** : table chronologique avec `request_id`, `level`, `http_path`, `app_message`
+
+![Dashboard Développeur](screenshots/dashboard_developpeur.png)
 
 ### Dashboard Support (`Support Dashboard`)
 
@@ -179,15 +202,16 @@ Destiné à une équipe support ou métier, sans connaissance technique. Visuali
 - **Taux de succès** : gauge `% requêtes 2xx / total`
 - **Volume de requêtes** : area chart temporel
 - **Nombre d'erreurs dernière heure** : compteur
-- **État du service** : indicateur vert/rouge basé sur le taux d'erreur
-- **Activité métier** : compteur `order_created` et `process_done`
+
+![Dashboard Support](screenshots/dashboard_support.png)
 
 ### Dashboard Air Quality (`Air Quality Dashboard`)
 
 - **Séries temporelles** : `Average(data_value)` par `pollutant` sur `@timestamp` (Lens)
-- **Comparaison par période** : heatmap ou table polluant × année
+- **Comparaison par période** : heatmap polluant × année
 - **Contrôle interactif** : Options list sur `geo_place_name` (filtrer par quartier/zone, ex. Bronx)
 
+![Filtre sur Bronx](screenshots/filtre_sur_bronx.png)
 ---
 
 ## Hypothèses et limites
