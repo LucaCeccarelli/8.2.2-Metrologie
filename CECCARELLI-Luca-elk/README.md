@@ -38,6 +38,8 @@ kubectl apply -f manifests/
 # Suivre l'état de tous les pods en temps réel
 kubectl get pods -n elk -w
 ```
+
+> NB : Les pods mettent environ 9 minutes à se lancer dans le bon ordre et tout importer.
 ### 6) Vérifier l'état final
 
 ```bash
